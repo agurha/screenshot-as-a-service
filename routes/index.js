@@ -3,10 +3,11 @@ var join = require('path').join;
 var fs = require('fs');
 var path = require('path');
 var request = require('request');
+var uuid = require('node-uuid');
 
 module.exports = function(app) {
   var rasterizerService = app.settings.rasterizerService;
-  var fileCleanerService = app.settings.fileCleanerService;
+  // var fileCleanerService = app.settings.fileCleanerService;
 
   // routes
   app.get('/', function(req, res, next) {
@@ -24,7 +25,8 @@ module.exports = function(app) {
       if (req.param(name, false)) options.headers[name] = req.param(name);
     });
 
-    var filename = 'screenshot_' + utils.md5(url + JSON.stringify(options)) + '.png';
+    // var filename = 'screenshot_' + utils.md5(url + JSON.stringify(options)) + '.png';
+    var filename = 'screenshot_' + uuid.v4() + '.png';
     options.headers.filename = filename;
 
     var filePath = join(rasterizerService.getPath(), filename);
@@ -89,7 +91,7 @@ module.exports = function(app) {
     console.log('Streaming image to %s', url);
     var fileStream = fs.createReadStream(imagePath);
     fileStream.on('end', function() {
-      fileCleanerService.addFile(imagePath);
+      // fileCleanerService.addFile(imagePath);
     });
     fileStream.on('error', function(err){
       console.log('Error while reading file: %s', err.message);
@@ -104,7 +106,7 @@ module.exports = function(app) {
   var sendImageInResponse = function(imagePath, res, callback) {
     console.log('Sending image in response');
     res.sendfile(imagePath, function(err) {
-      fileCleanerService.addFile(imagePath);
+      // fileCleanerService.addFile(imagePath);
       callback(err);
     });
   }
